@@ -8,19 +8,16 @@ app.use(express.json());
 app.use(cors());
 
 // เชื่อมต่อ MongoDB Atlas
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("MongoDB connected"))
-.catch(err => console.error(err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error(err));
 
 // Routes
 const authRoutes = require('./routes/auth');
-const expenseRoutes = require('./routes/expenses');
+// const expenseRoutes = require('./routes/expenses');
 
 app.use('/api', authRoutes);
-app.use('/api', expenseRoutes);
+// app.use('/api', expenseRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

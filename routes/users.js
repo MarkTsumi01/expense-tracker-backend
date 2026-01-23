@@ -4,7 +4,7 @@ const router = express.Router();
 const User = require("../models/User");
 const { authMiddleware, requireRole } = require("../middleware/auth");
 
-// ✅ Promote user เป็น admin
+// ✅ Promote User
 router.put("/users/:id/promote", authMiddleware, requireRole("admin"), async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
@@ -19,7 +19,7 @@ router.put("/users/:id/promote", authMiddleware, requireRole("admin"), async (re
   }
 });
 
-// ✅ ดึงรายชื่อผู้ใช้ทั้งหมด (เฉพาะ Admin)
+// ✅ Get All Users
 router.get("/users", authMiddleware, requireRole("admin"), async (req, res) => {
   try {
     const users = await User.find();
@@ -29,23 +29,36 @@ router.get("/users", authMiddleware, requireRole("admin"), async (req, res) => {
   }
 });
 
+// ✅ Toggle Active
 router.put("/:id/toggle-active", async (req, res) => {
   try {
     const { id } = req.params;
-    const { active } = req.body; // frontend ส่ง active: true/false
+    const { active } = req.body;
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // ถ้าไม่ส่ง active มา → toggle จากค่าปัจจุบัน
     user.active = active !== undefined ? active : !user.active;
-
     await user.save();
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
+// ✅ Delete User
+router.delete("/:id", authMiddleware, requireRole("admin"), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndDelete(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ message: "User deleted successfully!" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
 
 module.exports = router;

@@ -1,11 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const userRoutes = require("./routes/users");
+
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+app.use('/api', userRoutes);
 
 // เชื่อมต่อ MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
@@ -14,10 +18,10 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 const authRoutes = require('./routes/auth');
-// const expenseRoutes = require('./routes/expenses');
+const expenseRoutes = require('./routes/expenses');
 
 app.use('/api', authRoutes);
-// app.use('/api', expenseRoutes);
+app.use('/api', expenseRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

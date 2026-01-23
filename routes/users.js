@@ -29,4 +29,23 @@ router.get("/users", authMiddleware, requireRole("admin"), async (req, res) => {
   }
 });
 
+router.put("/:id/toggle-active", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { active } = req.body; // frontend ส่ง active: true/false
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // ถ้าไม่ส่ง active มา → toggle จากค่าปัจจุบัน
+    user.active = active !== undefined ? active : !user.active;
+
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
 module.exports = router;

@@ -15,16 +15,15 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // เข้ารหัส password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // ✅ ถ้าไม่ส่ง role มา → default เป็น "user"
     const newUser = new User({
       username,
       email,
       passwordHash,
       role: role || "user",
+      active: true
     });
 
     await newUser.save();
@@ -51,6 +50,10 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
+    if (!user.active) {
+      return res.status(403).json({ message: "Account is deactivated" });
+    }
+
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
@@ -66,7 +69,8 @@ router.post("/login", async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role, // ✅ ส่ง role กลับไป
+        role: user.role,
+        active : user.active // ✅ ส่ง role กลับไป
       },
     });
   } catch (err) {
